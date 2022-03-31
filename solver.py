@@ -3,6 +3,7 @@ from board import board
 import pickle
 import random
 import difflib
+import re
 
 # import the word as a set
 with open("wordledict.pickle", 'rb') as pickledict:
@@ -12,14 +13,16 @@ with open("wordledict.pickle", 'rb') as pickledict:
 with open("common.pickle", 'rb') as pickledict:
     common_words = pickle.load(pickledict)
 
-# create the board
-b = board()
+def new_board():
+    # create the board
+    b = board()
 
-# suggest starters
-starters = ["React","Adieu","Later","Sired","Tears","Alone","Arise","About","Atone","Irate","Snare","Cream","Paint","Worse","Sauce","Anime","Prowl","Roast","Drape","Media"]
-cur_choice = random.choice(starters).upper()
+    # suggest starters
+    starters = ["React","Adieu","Later","Sired","Tears","Alone","Arise","About","Atone","Irate","Snare","Cream","Paint","Worse","Sauce","Anime","Prowl","Roast","Drape","Media"]
+    cur_choice = random.choice(starters).upper()
 
-print("I suggest you start with {}.".format(cur_choice))
+    print("I suggest you start with {}.".format(cur_choice))
+    return cur_choice, b
 
 def ask():
     pat = input("What did it return?\n(format: x for blank, y for yellow, g for green, no spaces\n")
@@ -33,8 +36,7 @@ def ask():
         ask()
 
 def eliminate_choices(vs, word):
-    lowc = 1
-    lowunc = 1
+    low = 1
     wc = None
     wunc = None
     r = False
@@ -42,6 +44,7 @@ def eliminate_choices(vs, word):
     for i in ref:
         r = False
         # iterate through the valid word list
+        pos = 0
         for letter, comp in zip( word.word, list(i) ):
             c = letter.color
             if c:
@@ -61,31 +64,68 @@ def eliminate_choices(vs, word):
                         r = True
             else:
                 # remove words that contain black letters
+                #TODO: modify this to except words which have duplicate letter as yellow or green
                 if letter.alpha in i:
-                    if i in vs: vs.remove(i)
-                    r = True
+                    remove = True
+                    for j in word.word:
+                        if j.alpha==letter.alpha and (j.color=="G" or j.color=="Y"): # don't remove condition
+                            remove = False
+                    if i in vs and remove: 
+                        vs.remove(i)
+                        r = True
+            pos += 1
+
         if not r:
-            if i in common_words:
-                # check for common words first, get highest semantic distance from current (maximize letter usage)
-                d = difflib.SequenceMatcher(None, i, word.word).ratio()
-                if d < lowc: 
-                    d = lowc
-                    wc = i
-            else: 
-                # do the same for uncommon words in case common words are exhausted
-                d = difflib.SequenceMatcher(None, i, word.word).ratio()
-                if d < lowunc: 
-                    d = lowunc
-                    wunc = i
-        w = wunc
-        if wc: w = wc
+            # TODO: at this step, there's a tendency to pick words with double letters, and I want to discourage that somehow
+            # check for common words first, get highest semantic distance from current (maximize letter usage)
+            d = difflib.SequenceMatcher(None, i, word.word).ratio()
+            if any(s==t for s, t in zip(word.word, word.word[1:])): d = d/.3 # maybe penalizes double letters? idk
+            if len(set(word.word))==5: d = d*.2 # small bonus for words with distinct letters
+            if i in common_words: d = d*.2 # small bonus for being a common word
+            if d < low: 
+                d = low
+                w = i
     return w, vs
 
-def loop(cur_choice, valid_set):
+def board_builder():
+    b = board()
+    b.add_word("WORDS", "XYGGX")
+    x = True
+    print("Welcome to the wordle builder!\n - Input workds and their patterns from an existing game in the following format:")
+    print("\nWORDS xyggx")
+    print("This will generate:")
+    b.list_words()
+    b = board()
+    while b.length < 6:
+        i = input("Add a word, or Enter to finish: ")
+        if not i: return cur_choice, b
+        l = i.split(" ")
+        try:
+            cur_choice = b.add_word(l[0].upper(), l[1].upper())
+        except:
+            print("Something happened, try again.")
+    return cur_choice, b
 
+def loop(valid_set, board=None, cur_choice=None):
     # get word feedback
+    b = board
+    if not cur_choice:
+        if b:
+            #start fresh
+            cur_choice, b = new_board()
+        else:
+            # start with existing board
+            cur_choice, b = board_builder()
+            # for word in board, eliminate choices from valid_set
+            print("processing board")
+            for word in b.board:
+                print("eliminating words incompatible with {}...".format(word.__str__()))
+                cur_choice, valid_set = eliminate_choices(valid_set, word)
+                print("system suggested {0} out of {1} remaining words as a next word".format( cur_choice, len(valid_set) ))
+            print("I suggest you start with {}.".format(cur_choice))
+    
     pattern = ask()
-    if pattern:
+    if pattern and b.length<7:
         word = b.add_word(cur_choice, pattern)
         b.list_words()
 
@@ -96,10 +136,17 @@ def loop(cur_choice, valid_set):
         print("{} remaining words to choose from".format(len(valid_set)))
         cur_choice = random.choice(list(valid_set)).upper()
         print("I suggest {} as your next word".format(next_guess))
-        loop(next_guess, valid_set)
+        loop(valid_set, b, next_guess)
     else:
         b.add_word(cur_choice, "GGGGG") 
         b.list_words()
         return
 
-loop(cur_choice, valid_set)
+print("Welcome to the Wordle Solver!")
+i = input("Start fresh or build a board? (0, 1):")
+if i == "1":
+    b=False
+else:
+    b=True
+
+loop(valid_set, b)
