@@ -2,6 +2,10 @@
 
 It solves Wordles
 
+This is what it looks like:
+
+![wordle solver in action](https://github.com/teejaytiger/wordlesolver/blob/master/wordlesolve1.PNG "Don't do drugs")
+
 ### Installation:
 Have python 3.8+ installed
 

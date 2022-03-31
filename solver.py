@@ -97,6 +97,9 @@ def loop(cur_choice, valid_set):
         cur_choice = random.choice(list(valid_set)).upper()
         print("I suggest {} as your next word".format(next_guess))
         loop(next_guess, valid_set)
-    else: return
+    else:
+        b.add_word(cur_choice, "GGGGG") 
+        b.list_words()
+        return
 
 loop(cur_choice, valid_set)
