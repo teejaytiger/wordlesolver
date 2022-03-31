@@ -20,7 +20,6 @@ def new_board():
     # suggest starters
     starters = ["React","Adieu","Later","Sired","Tears","Alone","Arise","About","Atone","Irate","Snare","Cream","Paint","Worse","Sauce","Anime","Prowl","Roast","Drape","Media"]
     cur_choice = random.choice(starters).upper()
-
     print("I suggest you start with {}.".format(cur_choice))
     return cur_choice, b
 

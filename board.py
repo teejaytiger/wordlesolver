@@ -14,11 +14,3 @@ class board:
     def list_words(self):
         for w in self.board:
             print(w)
-
-"""
-wordle = board()
-wordle.add_word("VAGUE", "GXYYX")
-wordle.add_word("STORK", "xxgxx")
-wordle.add_word("CHIMP", "yxxxy")
-wordle.list_words()
-"""
