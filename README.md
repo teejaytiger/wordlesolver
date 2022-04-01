@@ -16,6 +16,7 @@ Open up your favorite wordle app and in a cmd window, run with:
 The solver will give you suggestions, including starters, and give you the best next choice for each row. 
 
 > Note: Only does hard mode strategy. Sorryyyyyy
+
 > Other note: I might make more strategies, starting with [VKRS](https://github.com/teejaytiger/wordlesolver/wiki/Performance-VS-VKRS) and modified VKRS, removing the words `QUICK` and `FJORD` and attempting to modify the word set to include `I`, `O`, and `D` while leaving three guesses remaining. 
 
 
