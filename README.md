@@ -36,4 +36,6 @@ Improved starter word options (**Valid for hard mode**)
 Board-aware starter traversal (**not valid for hard mode**)
 * Checks the valid word list length and scores and suggest a winner at a sufficient threshold
 
+Turn-Aware strategy/weighting adjustments
+
 Thanks!

@@ -80,7 +80,7 @@ def eliminate_choices(vs, word):
             if any(s==t for s, t in zip(i, i[1:])): d = d/.3 # maybe penalizes double letters? idk
             if len(set(i))==5: d = d*.2 # small bonus for words with distinct letters
             if i in common_words: d = d*.2 # small bonus for being a common word
-            # print("{0:.2f} : {1}".format(d, i)) # uncomment to get scores
+            # print("{0:.2f} : {1}".format(d, i)) # uncomment to get printed word scores before each attempt
             if d < low: 
                 low = d
                 w = i
